@@ -62,7 +62,15 @@ When Benchmarking on Centaurus:
     chmod +x queue_main.sh
 
     sbatch queue_main.sh
+    
+If you recieve an error on Centaurus like rapidjson/document.h: No such file or directory, run the following commands in the project directory:
 
+    rm -rf rapidjson
+    
+    git clone https://github.com/Tencent/rapidjson.git
 
+After cloning, sbatch again.
+    
 
 This creates the file results.txt, which contains the output and runtimes for the benchmark cases defined in the queue_main.sh script.
+
