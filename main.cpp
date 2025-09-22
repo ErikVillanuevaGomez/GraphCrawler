@@ -59,7 +59,7 @@ std::vector<std::string> getNeighbors(const std::string& node){
 int main(int argc, char **argv){
     if(argc != 3){
         std::cerr <<"Usage: " << argv[0] << " <start_node> <depth>" << std::endl;
-        std::cerr << "Example: " << argv[0] << " \"Tom_Hanks\" 2" << std::endl;
+        std::cerr << "Example: " << argv[0] << " \"Tom Hanks\" 2" << std::endl;
         return 1;
         
     }

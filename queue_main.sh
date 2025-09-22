@@ -13,10 +13,10 @@ make
 rm -f results.txt
 
 echo "Running Tom Hanks (Depth 2)..." >> results.txt
-./GraphCrawler "Tom_Hanks" 2 >> results.txt
+./GraphCrawler "Tom Hanks" 2 >> results.txt
 
 echo "Running Tom Hanks (Depth 3)..." >> results.txt
-./GraphCrawler "Tom_Hanks" 3 >> results.txt
+./GraphCrawler "Tom Hanks" 3 >> results.txt
 
 echo "Running Kevin Bacon (Depth 2)..." >> results.txt
-./GraphCrawler "Kevin_Bacon" 2 >> results.txt
+./GraphCrawler "Kevin Bacon" 2 >> results.txt
