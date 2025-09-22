@@ -16,44 +16,49 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include <memory>
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp){
     ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+    return size* nmemb;
 }
 
 std::vector<std::string> getNeighbors(const std::string& node){
-    CURL *curl;
-    CURLcode res;
-    std::string readBuffer;
     std::vector<std::string> neighbors;
+    CURL *curl = curl_easy_init();
     
-    curl = curl_easy_init();
     if(curl){
-        std::string url = "http://hollywood-graph-crawler.bridgesuncc.org/neighbors/" + node;
+        char *encoded_node_c = curl_easy_escape(curl, node.c_str(), node.length());
         
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        std::unique_ptr<char, decltype(&curl_free)> encoded_node(encoded_node_c, &curl_free);
         
-        res = curl_easy_perform(curl);
-        
-        if(res != CURLE_OK){
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        }
-        
-        curl_easy_cleanup(curl);
-        
-        rapidjson::Document doc;
-        doc.Parse(readBuffer.c_str());
-        
-        if(doc.HasMember("neighbors") && doc["neighbors"].IsArray()){
-            for(const auto& neighbor : doc["neighbors"].GetArray()){
-                neighbors.push_back(neighbor.GetString());
+        if(encoded_node){
+            std::string url = "http://hollywood-graph-crawler.bridgesuncc.org/neighbors/" + std::string(encoded_node.get());
+            std::string readBuffer;
+            
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+            CURLcode res = curl_easy_perform(curl);
+            if(res == CURLE_OK){
+                rapidjson::Document doc;
+                doc.Parse(readBuffer.c_str());
+                
+                if(!doc.HasParseError() && doc.IsObject() && doc.HasMember("neighbors") && doc["neighbors"].IsArray()){
+                    for(const auto& neighbor : doc["neighbors"].GetArray()){
+                        neighbors.push_back(neighbor.GetString());
+                    }
+                    
+                }
+            } else{
+                fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             }
         }
+        curl_easy_cleanup(curl);
     }
     return neighbors;
+
 }
 
 int main(int argc, char **argv){
